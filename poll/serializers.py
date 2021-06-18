@@ -6,7 +6,7 @@ from backend.utils import not_found
 
 class QuestionSerializer(serializers.ModelSerializer):
     votes = serializers.ReadOnlyField()
-    type = serializers.SerializerMethodField('get_type_text')
+    type = serializers.SerializerMethodField("get_type_text")
     answers = serializers.JSONField()
 
     @staticmethod
@@ -52,21 +52,23 @@ class PollSerializer(serializers.ModelSerializer):
 class VoteSerializer(serializers.Serializer):
     question_id = serializers.IntegerField(required=True)
     user_id = serializers.IntegerField(required=False)
+    answer = serializers.CharField(required=True)
 
     def create(self, validated_data):
-        question_id = validated_data.get('question_id')
-        question = not_found(Question, 'get', {'pk': question_id})
+        question_id = validated_data.get("question_id")
+        question = not_found(Question, "get", {"pk": question_id})
+        answer = validated_data.get("answer")
         if question.poll.expired:
-            raise PermissionDenied('Poll expired!')
-        if pk := validated_data.get('user_id', None):
+            raise PermissionDenied("Poll expired!")
+        if pk := validated_data.get("user_id", None):
             user = AnonymousUser.objects.get(pk=pk)
             if user.votes.filter(question_id=question_id).all():
-                raise PermissionDenied('User already vote')
+                raise PermissionDenied("User already vote")
         else:
             user = AnonymousUser.objects.create()
-        vote = Votes.objects.create(question=question,
-                                    user=user,
-                                    poll=question.poll)
+        vote = Votes.objects.create(question=question, user=user,
+                                    poll=question.poll,
+                                    answer=answer)
         return vote
 
     def update(self, instance, validated_data):
@@ -78,7 +80,19 @@ class VoteSerializerResponse(serializers.ModelSerializer):
     poll_id = serializers.IntegerField()
     user_id = serializers.IntegerField()
     timestamp = serializers.DateTimeField()
+    answer = serializers.CharField()
 
     class Meta:
         model = Votes
-        fields = ["question", "user_id", "poll_id", "timestamp"]
+        fields = ["question", "user_id", "poll_id","answer", "timestamp"]
+
+
+class VotedSerializer(serializers.ModelSerializer):
+    question = QuestionSerializer()
+    poll = PollSerializer()
+    user_id = serializers.IntegerField()
+    answer = serializers.CharField()
+
+    class Meta:
+        model = Votes
+        fields = ['user_id', 'poll', 'question', 'answer']

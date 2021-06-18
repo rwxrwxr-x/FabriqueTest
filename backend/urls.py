@@ -16,10 +16,17 @@ Including another URLconf
 from django.urls import path, include
 from rest_framework import routers
 from django.conf.urls import url
-from poll.views import PollsViewSet, QuestionGetPost, QuestionsDeleteUpdate,\
-    upvote, voted
-from rest_framework_simplejwt.views import TokenRefreshView, \
+from poll.views import (
+    PollsViewSet,
+    QuestionGetPost,
+    QuestionsDeleteUpdate,
+    upvote,
+    voted,
+    active_polls
+)
+from rest_framework_simplejwt.views import TokenRefreshView,\
     TokenObtainPairView
+
 router = routers.DefaultRouter()
 router.register(r"polls", PollsViewSet, "polls")
 
@@ -29,7 +36,8 @@ urlpatterns = [
         QuestionsDeleteUpdate.as_view()),
     url(r"^api/polls/(?P<poll_id>[-\w]+)/question?$",
         QuestionGetPost.as_view()),
-    url(r"^api/polls/(?P<poll_id>[-\w]+)/vote", upvote),
+    url(r"^api/active_polls/(?P<poll_id>[-\w]+)/vote", upvote),
+    url(r"^api/active_polls/", active_polls),
     url(r"^api/voted/(?P<user_id>[-\w]+)", voted),
     url(r"^api/token/refresh/", TokenRefreshView.as_view()),
     url(r"^api/token/", TokenObtainPairView.as_view()),

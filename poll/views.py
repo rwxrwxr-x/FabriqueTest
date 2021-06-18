@@ -7,23 +7,42 @@ from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
 from backend.utils import not_found
 from .models import Poll, Question, AnonymousUser
-from .serializers import PollSerializer, QuestionSerializer, VoteSerializer, \
-    VoteSerializerResponse
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
+from .serializers import (
+    PollSerializer,
+    QuestionSerializer,
+    VoteSerializer,
+    VoteSerializerResponse,
+    VotedSerializer
+)
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticatedOrReadOnly,
+    IsAuthenticated,
+)
 
 
-@api_view(['GET'])
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def active_polls(request):
+    queryset = Poll.objects.filter(expired=False).all()
+    serializer = PollSerializer(queryset)
+    return Response(serializer)
+
+
+@api_view(["GET"])
 @permission_classes([AllowAny])
 def voted(request, user_id):
-    user = not_found(AnonymousUser, 'get', {'pk': user_id})
-    return Response(None)
+    user = not_found(AnonymousUser, "get", {"pk": user_id})
+    serializer = VotedSerializer(user.votes)
+    return Response(serializer)
 
-@api_view(['POST'])
+
+@api_view(["POST"])
 @permission_classes([AllowAny])
 def upvote(request, poll_id):
-    serializer = VoteSerializer(data=request.data,
-                                context={'request': request,
-                                         'poll_id': poll_id})
+    serializer = VoteSerializer(
+        data=request.data, context={"request": request, "poll_id": poll_id}
+    )
     serializer.is_valid(raise_exception=True)
     res = VoteSerializerResponse(serializer.save()).data
     return Response(res)
@@ -41,7 +60,7 @@ class QuestionGetPost(APIView):
         queryset = self.get_queryset(poll_id).questions
 
         serializer = self.serializer_class(
-            queryset, many=True, context={'request': request}
+            queryset, many=True, context={"request": request}
         )
 
         return Response(serializer.data)
@@ -49,7 +68,7 @@ class QuestionGetPost(APIView):
     def post(self, request, poll_id, *args, **kwargs):
         queryset = self.get_queryset(pk=poll_id)
         serializer = self.serializer_class(
-            data=request.data, context={'request': request}
+            data=request.data, context={"request": request}
         )
         if serializer.is_valid(raise_exception=True):
             Question.objects.create(poll=queryset, **serializer.data)
@@ -67,13 +86,13 @@ class QuestionsDeleteUpdate(APIView):
         return get_object_or_404(self.queryset, pk=pk)
 
     def put(self, request, question_id):
-        serializer_instance = not_found(self.queryset, 'get',
-                                        {'pk': question_id})
+        serializer_instance = not_found(self.queryset, "get",
+                                        {"pk": question_id})
         serializer = self.serializer_class(
             serializer_instance,
-            context={'context': request},
+            context={"context": request},
             data=request.data,
-            partial=True
+            partial=True,
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()

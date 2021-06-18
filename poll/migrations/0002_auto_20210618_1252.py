@@ -7,34 +7,71 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('poll', '0001_initial'),
+        ("poll", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AnonymousUser',
+            name="AnonymousUser",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'user',
+                "db_table": "user",
             },
         ),
         migrations.RenameField(
-            model_name='question',
-            old_name='question',
-            new_name='title',
+            model_name="question",
+            old_name="question",
+            new_name="title",
         ),
         migrations.CreateModel(
-            name='Votes',
+            name="Votes",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('poll', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='poll_voted', to='poll.Poll')),
-                ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='voted_user', to='poll.Question')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='votes', to='poll.AnonymousUser')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "poll",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="poll_voted",
+                        to="poll.Poll",
+                    ),
+                ),
+                (
+                    "question",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="voted_user",
+                        to="poll.Question",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="votes",
+                        to="poll.AnonymousUser",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'votes',
+                "db_table": "votes",
             },
         ),
     ]
