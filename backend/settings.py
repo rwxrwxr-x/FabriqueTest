@@ -74,7 +74,7 @@ TEMPLATES = [
 ]
 
 
-WSGI_APPLICATION = "fabrique.wsgi.application"
+WSGI_APPLICATION = "backend.wsgi.application"
 
 
 # Database

@@ -1,5 +1,24 @@
-# FabriqueTest
+## FabriqueTest
+Тестовое задание.
 
+Развернуть локально:
+```bash
+chmod +x run.sh
+./run.sh postgres
+./run.sh migrate
+./run.sh -x runserver
+```
+
+Поднять в контейнере:
+```bash
+docker compose build
+docker compose up
+```
+
+
+**Спецификация API находится в openapi-schema.yaml**
+Визуально её пощупать можно загрузив в редактор **[swagger](https://editor.swagger.io)**.
+```yaml
 Задача: спроектировать и разработать API для системы опросов пользователей.
 
 Функционал для администратора системы:
@@ -16,3 +35,4 @@
 - получение пройденных пользователем опросов с детализацией по ответам (что выбрано) по ID уникальному пользователя
 
 Использовать следующие технологии: Django 2.2.10, Django REST framework.
+```

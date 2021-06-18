@@ -1,5 +1,5 @@
 #!/bin/zsh
-APP='backend'
+APP='fabrique'
 DB='{APP}_postgres'
 DB_NAME='{APP}'
 
@@ -41,10 +41,16 @@ app (){
         ${APP}:latest run head
 }
 
+migrate (){
+  : Finding and applying migrations
+  python manage.py makemigrations
+  python manage.py migrate
+  poetry shell
+}
 
 -x (){
     : Running inner cli commands
-    $BIN/python manage.py $@
+    python manage.py $@
 }
 
 
@@ -57,4 +63,5 @@ fi
 
 export APP_ENV='.env'
 
+poetry shell
 "$@"

@@ -1,0 +1,448 @@
+swagger: '2.0'
+info:
+  title: FabriqueTest
+  version: v1
+host: '127.0.0.1:8000'
+schemes:
+  - http
+basePath: /api
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+paths:
+  /active_polls/:
+    get:
+      operationId: active_polls_list
+      description: 'Retrieve active polls'
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Poll'
+      tags:
+        - active_polls
+    parameters: []
+  '/active_polls/{poll_id}/vote':
+    post:
+      operationId: active_polls_vote_create
+      description: 'Vote in active poll'
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Upvote'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/UpvoteResponse'
+      tags:
+        - active_polls
+    parameters:
+      - name: poll_id
+        in: path
+        required: true
+        type: string
+  /polls/:
+    get:
+      operationId: polls_list
+      description: 'Get all polls'
+      parameters:
+        - name: page
+          in: query
+          description: A page number within the paginated result set.
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+              - count
+              - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Poll'
+      tags:
+        - polls
+    post:
+      operationId: polls_create
+      description: 'Create new poll, the model provides for inheritance in relation to questions'
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Poll'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Poll'
+      security:
+      - api_key: []
+      tags:
+        - polls
+    parameters: []
+  '/polls/{id}/':
+    get:
+      operationId: polls_read
+      description: 'Get concrete poll'
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Poll'
+      tags:
+        - polls
+    put:
+      operationId: polls_update
+      description: 'Update poll fields'
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Poll'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Poll'
+      security:
+      - api_key: []
+      tags:
+        - polls
+    patch:
+      operationId: polls_partial_update
+      description: 'Partial update poll'
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Poll'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Poll'
+      security:
+      - api_key: []            
+      tags:
+        - polls
+    delete:
+      operationId: polls_delete
+      description: 'Delete poll with questions'
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      security:
+      - api_key: []
+      tags:
+        - polls
+    parameters:
+      - name: id
+        in: path
+        description: A unique integer value identifying this poll.
+        required: true
+        type: integer
+  '/polls/{poll_id}/question':
+    get:
+      operationId: polls_question_list
+      parameters: []
+      responses:
+        '201':
+          description: 'Get questions of poll'
+          schema:
+            $ref: '#/definitions/Question'    
+      tags:
+        - polls
+    post:
+      operationId: polls_question_create
+      description: 'Add question to poll'
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Question'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Question'
+      security:
+      - api_key: []
+      tags:
+        - polls
+    parameters:
+      - name: poll_id
+        in: path
+        required: true
+        type: string
+  '/question/{question_id}':
+    put:
+      operationId: question_update
+      description: 'Change question'
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Question'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Question'
+      security:
+      - api_key: []
+      tags:
+        - question
+    delete:
+      operationId: question_delete
+      description: 'Delete question'
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      security:
+      - api_key: []
+      tags:
+        - question
+    parameters:
+      - name: question_id
+        in: path
+        required: true
+        type: string
+  /token/:
+    post:
+      operationId: token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TokenObtainPair'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/TokenObtainPair'
+      tags:
+        - token
+    parameters: []
+  /token/refresh/:
+    post:
+      operationId: token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      parameters:
+        - name: data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TokenRefresh'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/TokenRefresh'
+      tags:
+        - token
+    parameters: []
+  '/voted/{user_id}':
+    get:
+      operationId: voted_read
+      description: 'Responses voted list of user by id'
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/VotedResponse'
+      tags:
+        - voted
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        type: string
+definitions:
+  Question:
+    required:
+      - question
+      - question_type
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      question:
+        title: Question
+        type: string
+        maxLength: 200
+        minLength: 1
+      votes:
+        title: Votes
+        type: string
+        readOnly: true
+      question_type:
+        title: Question type
+        type: integer
+      type:
+        title: Type
+        type: string
+        readOnly: true
+        
+  Poll:
+    required:
+      - title
+      - description
+      - questions
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      title:
+        title: Title
+        type: string
+        maxLength: 20
+        minLength: 1
+      description:
+        title: Description
+        type: string
+        maxLength: 256
+        minLength: 1
+      questions:
+        type: array
+        items:
+          $ref: '#/definitions/Question'
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+      expires_at:
+        title: Expires at
+        type: string
+        format: date-time
+        x-nullable: true
+      expired:
+        title: Expired
+        type: boolean
+  Upvote:
+    required:
+      - question_id
+    type: object
+    properties:
+      question_id:
+        title: Question id
+        type: integer
+      user_id:
+        title: Anonymous user id
+        type: integer
+  UpvoteResponse:
+    type: object
+    properties:
+      question:
+        type: object
+        $ref: '#/definitions/Question'
+      poll_id:
+        type: integer
+      user_id:
+        type: integer
+      timestamp:
+        type: string
+      answer:
+        type: string
+  VotedResponse:
+    type: object
+    properties:
+      question:
+        type: object
+        $ref: '#/definitions/Question'
+      poll:
+        type: object
+        $ref: '#/definitions/Poll'
+      user_id:
+        type: integer
+      answer:
+        type: string
+  TokenObtainPair:
+    required:
+      - username
+      - password
+    type: object
+    properties:
+      username:
+        title: Username
+        type: string
+        minLength: 1
+      password:
+        title: Password
+        type: string
+        minLength: 1
+  TokenRefresh:
+    required:
+      - refresh
+    type: object
+    properties:
+      refresh:
+        title: Refresh
+        type: string
+        minLength: 1
