@@ -15,11 +15,17 @@ Including another URLconf
 """
 from django.urls import path, include
 from rest_framework import routers
-from poll.views import Polls
+from django.conf.urls import url
+from poll.views import PollsViewset, QuestionGetPost, QuestionsDeleteUpdate
 
 router = routers.DefaultRouter()
-router.register(r"polls", Polls, "polls")
+router.register(r"polls", PollsViewset, "polls")
 
 urlpatterns = [
     path("api/", include(router.urls)),
+    url(r"^api/question/(?P<question_id>\w+)?$",
+        QuestionsDeleteUpdate.as_view()),
+    url(r"^api/polls/(?P<poll_id>[-\w]+)/question?$",
+        QuestionGetPost.as_view()),
+
 ]

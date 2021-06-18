@@ -1,0 +1,15 @@
+*.pyc
+*.pyo
+*.mo
+*.db
+.idea
+.pydevproject
+.idea/workspace.xml
+.DS_Store
+.git/
+.gitignore
+__pycache__
+Dockerfile
+docker-compose
+README.md
+.vscode/
