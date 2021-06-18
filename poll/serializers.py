@@ -5,9 +5,18 @@ from backend.utils import not_found
 
 
 class QuestionSerializer(serializers.ModelSerializer):
+    votes = serializers.ReadOnlyField()
+    type = serializers.SerializerMethodField('get_type_text')
+    answers = serializers.JSONField()
+
+    @staticmethod
+    def get_type_text(obj):
+        return obj.question_type.type
+
     class Meta:
         model = Question
-        fields = ["id", "question"]
+        fields = ["id", "question", "votes", "question_type", "type",
+                  "answers"]
 
 
 class PollSerializer(serializers.ModelSerializer):
@@ -68,7 +77,8 @@ class VoteSerializerResponse(serializers.ModelSerializer):
     question = QuestionSerializer()
     poll_id = serializers.IntegerField()
     user_id = serializers.IntegerField()
+    timestamp = serializers.DateTimeField()
 
     class Meta:
         model = Votes
-        fields = ['question', 'user_id', 'poll_id']
+        fields = ["question", "user_id", "poll_id", "timestamp"]

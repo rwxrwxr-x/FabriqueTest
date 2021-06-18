@@ -52,6 +52,14 @@ class QuestionAnswers(models.Model):
 class Question(models.Model):
     poll = models.ForeignKey(Poll, related_name='questions',
                              on_delete=models.CASCADE)
+    question_type = models.ForeignKey(QuestionTypes,
+                                      related_name='questions_type',
+                                      on_delete=models.CASCADE)
+    answers = models.ForeignKey(
+        QuestionAnswers,
+        related_name='question',
+        on_delete=models.CASCADE
+    )
     title = models.CharField(max_length=200)
     votes = models.IntegerField(default=0)
 
@@ -78,6 +86,8 @@ class Votes(models.Model):
         related_name='poll_voted',
         on_delete=models.CASCADE
     )
+    answer = models.CharField(max_length=256)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'votes'

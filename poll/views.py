@@ -2,16 +2,24 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
 from backend.utils import not_found
-from .models import Poll, Question
+from .models import Poll, Question, AnonymousUser
 from .serializers import PollSerializer, QuestionSerializer, VoteSerializer, \
     VoteSerializerResponse
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def voted(request, user_id):
+    user = not_found(AnonymousUser, 'get', {'pk': user_id})
+    return Response(None)
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def upvote(request, poll_id):
     serializer = VoteSerializer(data=request.data,
                                 context={'request': request,
@@ -24,6 +32,7 @@ def upvote(request, poll_id):
 class QuestionGetPost(APIView):
     serializer_class = QuestionSerializer
     queryset = Poll.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self, pk):
         return get_object_or_404(self.queryset, pk=pk)
@@ -52,6 +61,7 @@ class QuestionGetPost(APIView):
 class QuestionsDeleteUpdate(APIView):
     serializer_class = QuestionSerializer
     queryset = Poll.objects.all()
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self, pk):
         return get_object_or_404(self.queryset, pk=pk)
@@ -73,6 +83,7 @@ class QuestionsDeleteUpdate(APIView):
 class PollsViewSet(viewsets.ModelViewSet):
     serializer_class = PollSerializer
     queryset = Poll.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def retrieve(self, request, pk=None, *args, **kwargs):
         queryset = Poll.objects.all()
