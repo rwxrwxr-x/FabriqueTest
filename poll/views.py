@@ -2,11 +2,23 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
 from backend.utils import not_found
 from .models import Poll, Question
-from .serializers import PollSerializer, QuestionSerializer
+from .serializers import PollSerializer, QuestionSerializer, VoteSerializer, \
+    VoteSerializerResponse
+
+
+@api_view(['POST'])
+def upvote(request, poll_id):
+    serializer = VoteSerializer(data=request.data,
+                                context={'request': request,
+                                         'poll_id': poll_id})
+    serializer.is_valid(raise_exception=True)
+    res = VoteSerializerResponse(serializer.save()).data
+    return Response(res)
 
 
 class QuestionGetPost(APIView):
@@ -58,7 +70,7 @@ class QuestionsDeleteUpdate(APIView):
         return Response(serializer.data)
 
 
-class PollsViewset(viewsets.ModelViewSet):
+class PollsViewSet(viewsets.ModelViewSet):
     serializer_class = PollSerializer
     queryset = Poll.objects.all()
 

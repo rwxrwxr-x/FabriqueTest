@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Poll, Question
+from .models import Poll, Question, Votes, AnonymousUser
+from rest_framework.exceptions import PermissionDenied
+from backend.utils import not_found
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -36,3 +38,37 @@ class PollSerializer(serializers.ModelSerializer):
         validated_data.pop("questions", None)
         Poll.objects.filter(pk=instance.pk).update(**validated_data)
         return instance
+
+
+class VoteSerializer(serializers.Serializer):
+    question_id = serializers.IntegerField(required=True)
+    user_id = serializers.IntegerField(required=False)
+
+    def create(self, validated_data):
+        question_id = validated_data.get('question_id')
+        question = not_found(Question, 'get', {'pk': question_id})
+        if question.poll.expired:
+            raise PermissionDenied('Poll expired!')
+        if pk := validated_data.get('user_id', None):
+            user = AnonymousUser.objects.get(pk=pk)
+            if user.votes.filter(question_id=question_id).all():
+                raise PermissionDenied('User already vote')
+        else:
+            user = AnonymousUser.objects.create()
+        vote = Votes.objects.create(question=question,
+                                    user=user,
+                                    poll=question.poll)
+        return vote
+
+    def update(self, instance, validated_data):
+        pass
+
+
+class VoteSerializerResponse(serializers.ModelSerializer):
+    question = QuestionSerializer()
+    poll_id = serializers.IntegerField()
+    user_id = serializers.IntegerField()
+
+    class Meta:
+        model = Votes
+        fields = ['question', 'user_id', 'poll_id']
